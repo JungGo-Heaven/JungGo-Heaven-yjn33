@@ -21,6 +21,7 @@ import com.example.junggoheaven.domain.product.exception.ProductSellStatusSameFl
 import com.example.junggoheaven.domain.product.service.component.ProductChecker;
 import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.product.service.component.ProductWriter;
+import com.example.junggoheaven.domain.product.sync.SyncPullAt;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
@@ -29,6 +30,7 @@ import com.example.junggoheaven.global.message.publisher.EventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -270,8 +272,11 @@ public class ProductService {
 			throw new ProductNotYourException();
 		}
 
-		// pullAt 최신화
-		product.pullProduct();
+		// 예외처리 로직 통과후 본격적인 동시성 처리
+		Semaphore semaphore = new Semaphore(1); // 이진 세마포어
+
+		SyncPullAt syncPullAt = new SyncPullAt(semaphore, product);
+		syncPullAt.run(); // 임계구역 진입
 
 		return new ProductResponseDto(product);
 	}

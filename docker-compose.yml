@@ -24,9 +24,9 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    command: >
-      bash -c "elasticsearch-plugin install --batch analysis-nori || true && 
-      elasticsearch-node"
+    #command: >
+     # bash -c "elasticsearch-plugin install --batch analysis-nori || true &&
+     # elasticsearch-node"
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.7.1
